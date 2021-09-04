@@ -1,0 +1,30 @@
+version: '3.7'
+
+networks:
+  ${STACK_NETWORK}:
+    external: true
+
+volumes:
+  geopedia_db:
+
+services:
+  app:
+    image: ${STACK_NAME}
+    # command: tail -f /dev/null
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ${WORKING_DIR}:/opt/geopedia
+    ports:
+      - "8000:8000"
+    networks:
+      - ${STACK_NETWORK}
+
+  geopedia_db:
+    image: postgres:13.4
+    environment:
+      - POSTGRES_DB=geopedia_db
+      - POSTGRES_PASSWORD=root
+    networks:
+      - ${STACK_NETWORK}
+    volumes:
+      - geopedia_db:/var/lib/postgresql/data
